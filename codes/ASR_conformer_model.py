@@ -147,16 +147,7 @@ class ConvBlock(nn.Module):
         super(ConvBlock, self).__init__()
         self.layer_norm = nn.LayerNorm(d_model, eps=6.1e-5)
         kernel_size=31
-        ####### Modifying for DUST#######
-#         self.module = nn.Sequential(
-#           nn.Conv1d(in_channels=d_model, out_channels=d_model * 2, kernel_size=1), # first pointwise with 2x expansion
-#           nn.GLU(dim=1),
-#           nn.Conv1d(in_channels=d_model, out_channels=d_model, kernel_size=kernel_size, padding='same', groups=d_model), # depthwise
-#           nn.BatchNorm1d(d_model, eps=6.1e-5),
-#           nn.SiLU(), # swish activation
-#           nn.Conv1d(in_channels=d_model, out_channels=d_model, kernel_size=1), # second pointwise
-#           nn.Dropout(dropout)
-#         )
+       
         self.conv1d_1 = nn.Conv1d(in_channels=d_model, out_channels=d_model * 2, kernel_size=1) # first pointwise with 2x expansion
         self.glu = nn.GLU(dim=1)
         self.conv1d_2 = nn.Conv1d(in_channels=d_model, out_channels=d_model, kernel_size=kernel_size, padding='same', groups=d_model) # depthwise
@@ -165,7 +156,7 @@ class ConvBlock(nn.Module):
         self.conv1d_3 = nn.Conv1d(in_channels=d_model, out_channels=d_model, kernel_size=1) # second pointwise
         self.dropout = nn.Dropout(dropout)
         
-    def forward(self, x, p=0):               # added for DUST
+    def forward(self, x, p=0):              
         x = self.layer_norm(x)
         x = x.transpose(1, 2) # (batch_size, d_model, seq_len)
         #x = self.module(x)
@@ -176,7 +167,7 @@ class ConvBlock(nn.Module):
         x = self.silu(x)
         x = self.conv1d_3(x)
         x = self.dropout(x)
-        x = F.dropout(x, p=p, training=True) # added for DUST
+        x = F.dropout(x, p=p, training=True) 
         return x.transpose(1, 2)
 
 
@@ -198,15 +189,7 @@ class FeedForwardBlock(nn.Module):
 #   '''
     def __init__(self, d_model=144, expansion=4, dropout=0.1):
         super(FeedForwardBlock, self).__init__()
-        ####### Modifying for DUST#######
-#         self.module = nn.Sequential(
-#           nn.LayerNorm(d_model, eps=6.1e-5),
-#           nn.Linear(d_model, d_model * expansion), # expand to d_model * expansion
-#           nn.SiLU(), # swish activation
-#           nn.Dropout(dropout),
-#           nn.Linear(d_model * expansion, d_model), # project back to d_model
-#           nn.Dropout(dropout)
-#         )
+       
         self.layer_norm = nn.LayerNorm(d_model, eps=6.1e-5)
         self.linear_1 = nn.Linear(d_model, d_model * expansion) # expand to d_model * expansion
         self.silu = nn.SiLU() # swish activation
@@ -214,7 +197,7 @@ class FeedForwardBlock(nn.Module):
         self.linear_2 = nn.Linear(d_model * expansion, d_model) # project back to d_model
         self.dropout_2 = nn.Dropout(dropout)
         
-    def forward(self, x, p=0):                 # added for DUST
+    def forward(self, x, p=0):                
         x = self.layer_norm(x)
         x = self.linear_1(x)
         x = self.silu(x)
@@ -242,13 +225,7 @@ class Conv2dSubsampling(nn.Module):
     '''
     def __init__(self, d_model=144):
         super(Conv2dSubsampling, self).__init__()
-        ####### Modifying for DUST#######
-#         self.module = nn.Sequential(
-#           nn.Conv2d(in_channels=1, out_channels=d_model, kernel_size=3, stride=2),
-#           nn.ReLU(),
-#           nn.Conv2d(in_channels=d_model, out_channels=d_model, kernel_size=3, stride=2),
-#           nn.ReLU(),
-#         )
+      
         self.conv2d_1 = nn.Conv2d(in_channels=1, out_channels=d_model, kernel_size=3, stride=2)
         self.relu = nn.ReLU()
         self.conv2d_2 = nn.Conv2d(in_channels=d_model, out_channels=d_model, kernel_size=3, stride=2)
