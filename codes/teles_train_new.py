@@ -186,7 +186,7 @@ class CustomLoss(nn.Module):
         return loss
 
 
-# shrinkage loss = l2/(1 + exp (a · (c − l)))
+
 # reference - https://ieeexplore.ieee.org/document/9273227
 # reference - https://github.com/carrierlxk/py-DSLT/blob/master/Train/SiamNet.py
 
